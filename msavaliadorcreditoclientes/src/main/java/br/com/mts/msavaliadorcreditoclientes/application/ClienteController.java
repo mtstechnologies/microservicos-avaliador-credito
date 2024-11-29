@@ -13,15 +13,18 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.mts.msavaliadorcreditoclientes.application.dto.ClienteDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("clientes")
 @RequiredArgsConstructor
+@Slf4j
 public class ClienteController {
 	private final ClienteService service;
 	
 	@GetMapping
 	public String status() {
+		log.info("Obtendo o status do microserviço de clientes");
 		return "ok";
 	}
 	
