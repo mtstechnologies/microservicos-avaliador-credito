@@ -21,6 +21,7 @@ public class MsavaliadorcreditogatewayApplication {
 				.routes()
 					.route(r -> r.path("/clientes/**").uri("lb://clientes-ms"))
 					.route(r -> r.path("/cartoes/**").uri("lb://cartoes-ms"))
+					.route(r -> r.path("/avaliador-credito/**").uri("lb://avaliador-credito-ms"))
 				.build();
 	}
 
