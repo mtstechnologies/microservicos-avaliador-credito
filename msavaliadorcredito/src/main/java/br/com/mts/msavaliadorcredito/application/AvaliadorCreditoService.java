@@ -2,6 +2,7 @@ package br.com.mts.msavaliadorcredito.application;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -10,14 +11,18 @@ import org.springframework.stereotype.Service;
 
 import br.com.mts.msavaliadorcredito.application.ex.DadosClienteNotFoundException;
 import br.com.mts.msavaliadorcredito.application.ex.ErroComunicacaoMicroservicesException;
+import br.com.mts.msavaliadorcredito.application.ex.ErroSolicitacaoCartaoException;
 import br.com.mts.msavaliadorcredito.domain.model.Cartao;
 import br.com.mts.msavaliadorcredito.domain.model.CartaoAprovado;
 import br.com.mts.msavaliadorcredito.domain.model.CartaoCliente;
 import br.com.mts.msavaliadorcredito.domain.model.DadosCliente;
+import br.com.mts.msavaliadorcredito.domain.model.DadosSolicitacaoEmissaoCartao;
+import br.com.mts.msavaliadorcredito.domain.model.ProtocoloSolicitacaoCartao;
 import br.com.mts.msavaliadorcredito.domain.model.RetornoAvaliacaoCliente;
 import br.com.mts.msavaliadorcredito.domain.model.SituacaoCliente;
 import br.com.mts.msavaliadorcredito.infra.clients.CartaoResourceFeingClient;
 import br.com.mts.msavaliadorcredito.infra.clients.ClienteResourceFeingClient;
+import br.com.mts.msavaliadorcredito.infra.queue.SolicitacaoEmissaoCartaoPublisher;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +32,7 @@ public class AvaliadorCreditoService {
 	
 	private final ClienteResourceFeingClient clienteResourceFeingClient;
 	private final CartaoResourceFeingClient cartaoResourceFeingClient;
+	private final SolicitacaoEmissaoCartaoPublisher solicitacaoEmissaoCartaoPublisher;
 	
 	//comunicacao direta(sincrona) com outro microservico
 	public SituacaoCliente obterSituacaoCliente(String cpf) 
@@ -82,6 +88,16 @@ public class AvaliadorCreditoService {
 				throw new DadosClienteNotFoundException();
 			}
 			throw new ErroComunicacaoMicroservicesException(e.getMessage(), status);
+		}
+	}
+	
+	public ProtocoloSolicitacaoCartao solicitarEmissaoCartao(DadosSolicitacaoEmissaoCartao dados) {
+		try {
+			solicitacaoEmissaoCartaoPublisher.solicitarCartao(dados);
+			var protocolo = UUID.randomUUID().toString();
+			return new ProtocoloSolicitacaoCartao(protocolo);
+		}catch (Exception e) {
+			throw new ErroSolicitacaoCartaoException(e.getMessage());
 		}
 	}
 }

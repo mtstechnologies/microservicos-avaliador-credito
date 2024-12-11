@@ -20,6 +20,7 @@ public class SolicitacaoEmissaoCartaoPublisher {
 	public void solicitarCartao(DadosSolicitacaoEmissaoCartao dados) throws JsonProcessingException {
 		//recebendo o objeto convertido em formato JSON para poder enviar as mensagens pela rede
 		var json = convertIntoJson(dados);
+		//caso rabbitmq caia tambem apresentara uma exception
 		rabbitTemplate.convertAndSend(queueEmissaoCartoes.getName(), json);
 	}
 	
