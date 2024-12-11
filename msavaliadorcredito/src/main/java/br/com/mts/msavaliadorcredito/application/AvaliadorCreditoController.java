@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.mts.msavaliadorcredito.application.ex.DadosClienteNotFoundException;
 import br.com.mts.msavaliadorcredito.application.ex.ErroComunicacaoMicroservicesException;
+import br.com.mts.msavaliadorcredito.application.ex.ErroSolicitacaoCartaoException;
 import br.com.mts.msavaliadorcredito.domain.model.DadosAvaliacao;
+import br.com.mts.msavaliadorcredito.domain.model.DadosSolicitacaoEmissaoCartao;
+import br.com.mts.msavaliadorcredito.domain.model.ProtocoloSolicitacaoCartao;
 import br.com.mts.msavaliadorcredito.domain.model.RetornoAvaliacaoCliente;
 import br.com.mts.msavaliadorcredito.domain.model.SituacaoCliente;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +59,17 @@ public class AvaliadorCreditoController {
 		} catch (ErroComunicacaoMicroservicesException e) {
 			
 			return ResponseEntity.status(HttpStatus.resolve(e.getStatus())).body(e.getMessage());
+		}
+	}
+	
+	@PostMapping("solicitacoes-cartao")
+	public ResponseEntity solicitarCartaoCliente(@RequestBody DadosSolicitacaoEmissaoCartao dados) {
+		try {
+			ProtocoloSolicitacaoCartao protocoloSolicitacaoCartao = avaliadorCreditoService
+					.solicitarEmissaoCartao(dados);
+			return ResponseEntity.ok(protocoloSolicitacaoCartao);
+		}catch(ErroSolicitacaoCartaoException e) {
+			return ResponseEntity.internalServerError().body(e.getMessage());
 		}
 	}
 	
